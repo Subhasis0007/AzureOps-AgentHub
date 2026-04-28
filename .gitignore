@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# Build artifacts
+dist/
+build/
+site/
+
+# IDE/editor
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Infrastructure and tooling state
+*.tfstate
+*.tfstate.*
+.terraform/
+*.bicepconfig.local.json
+
+# Logs and runtime files
+*.log
+*.pid
+
+# Test artifacts
+junit.xml
+coverage.xml
+
+# Agent/runtime temp files
+.foundry/
+_temp_sample/
+_temp_sample.zip
