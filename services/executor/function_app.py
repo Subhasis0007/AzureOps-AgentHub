@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from typing import Any
 
 import azure.functions as func
 
@@ -11,7 +10,6 @@ from core.config.settings import get_settings
 from core.state.schema import ACRGEState, IncidentEvent, MessageTrace
 from core.utils.ids import generate_id
 from core.utils.logging import clear_log_context, configure_logging, get_logger, set_log_context
-
 
 settings = get_settings()
 configure_logging(settings.log_level)

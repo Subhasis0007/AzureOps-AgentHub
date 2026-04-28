@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import Any
+from typing import Any, Literal, cast
 
 from core.state.schema import IncidentEvent, IncidentSeverity, IncidentSource
 from core.utils.ids import deterministic_fingerprint
@@ -63,7 +63,10 @@ def build_incident(
     evidence_uris: list[str] | None = None,
     requires_human: bool = False,
 ) -> IncidentEvent:
-    safe_env = environment if environment in {"dev", "test", "stage", "prod"} else "dev"
+    safe_env = cast(
+        Literal["dev", "test", "stage", "prod"],
+        environment if environment in {"dev", "test", "stage", "prod"} else "dev",
+    )
     return IncidentEvent(
         source=source,
         source_event_id=source_event_id(payload),

@@ -33,11 +33,11 @@ def normalize_event(event_type: str, payload: dict[str, Any], *, environment: st
 
 
 __all__ = [
-    "IncidentNormalizer",
-    "normalize_event",
-    "AzureDevOpsNormalizer",
-    "ServiceBusNormalizer",
-    "LogicAppNormalizer",
     "ADFNormalizer",
+    "AzureDevOpsNormalizer",
     "DatabricksNormalizer",
+    "IncidentNormalizer",
+    "LogicAppNormalizer",
+    "ServiceBusNormalizer",
+    "normalize_event",
 ]

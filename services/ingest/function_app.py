@@ -14,7 +14,6 @@ from core.utils.logging import clear_log_context, configure_logging, get_logger,
 from services.ingest.normalizers import normalize_event
 from services.ingest.normalizers.common import extract_correlation_id
 
-
 settings = get_settings()
 configure_logging(settings.log_level)
 logger = get_logger("services.ingest")

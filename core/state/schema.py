@@ -129,7 +129,7 @@ class PullRequestSpec(BaseModel):
     created_at: datetime = Field(default_factory=utc_now)
 
     @model_validator(mode="after")
-    def validate_source_branch(self) -> "PullRequestSpec":
+    def validate_source_branch(self) -> PullRequestSpec:
         if not self.source_branch.startswith("acrge/fix/"):
             self.source_branch = pr_branch_name(self.incident_id)
         return self
@@ -191,7 +191,7 @@ class ACRGEState(BaseModel):
     def to_langgraph_state(self) -> dict[str, Any]:
         return self.model_dump(mode="json")
 
-    def update_from_node(self, update: dict[str, Any]) -> "ACRGEState":
+    def update_from_node(self, update: dict[str, Any]) -> ACRGEState:
         merged = self.model_dump(mode="python")
         merged.update(update)
         return ACRGEState.model_validate(merged)

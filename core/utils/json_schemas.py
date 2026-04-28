@@ -4,7 +4,6 @@ from typing import Any
 
 from jsonschema import Draft202012Validator
 
-
 DIAGNOSTIC_REPORT_SCHEMA: dict[str, Any] = {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",

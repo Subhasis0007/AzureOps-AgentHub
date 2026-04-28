@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from agents.code_generation.agent import CodeGenerationAgent
-from core.state.schema import ACRGEState, DiagnosticReport
+from core.state.schema import ACRGEState, DiagnosticReport, LogTaxonomy
 
 
 def test_code_generation_produces_pr_spec(base_state: ACRGEState, tmp_path: Path) -> None:
@@ -13,7 +13,7 @@ def test_code_generation_produces_pr_spec(base_state: ACRGEState, tmp_path: Path
                 incident_id=base_state.incident.incident_id,
                 summary="Likely config issue in pipeline",
                 confidence=0.78,
-                taxonomy="config",
+                taxonomy=LogTaxonomy.CONFIG,
                 root_cause_hypotheses=["Config variable drift"],
             )
         }

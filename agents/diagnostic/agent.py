@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any, Protocol
 
 from jinja2 import Environment, StrictUndefined
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict
 
 from agents.diagnostic.tools.infra_graph import InfraGraphAdapter
 from agents.diagnostic.tools.log_analytics import LogAnalyticsAdapter

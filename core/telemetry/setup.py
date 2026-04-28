@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from time import perf_counter
+from types import TracebackType
 from typing import Any
 
 from opentelemetry import metrics, trace
@@ -14,16 +16,11 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExport
 
 from core.config.settings import RuntimeSettings, get_settings
 
+azure_monitor_exporter: Any | None
 try:
-    from azure.monitor.opentelemetry.exporter import (
-        AzureMonitorLogExporter,
-        AzureMonitorMetricExporter,
-        AzureMonitorTraceExporter,
-    )
+    import azure.monitor.opentelemetry.exporter as azure_monitor_exporter
 except Exception:  # pragma: no cover - optional for constrained local envs
-    AzureMonitorLogExporter = None  # type: ignore[assignment]
-    AzureMonitorMetricExporter = None  # type: ignore[assignment]
-    AzureMonitorTraceExporter = None  # type: ignore[assignment]
+    azure_monitor_exporter = None
 
 
 @dataclass(frozen=True)
@@ -77,18 +74,22 @@ class Telemetry:
             ),
         )
 
-    def start_span(self, name: str):
+    def start_span(self, name: str) -> AbstractContextManager[Any]:
         tracer = trace.get_tracer("acrge-lite")
         return tracer.start_as_current_span(name)
 
-    def timed_block(self, metric: Histogram, attributes: dict[str, Any]):
+    def timed_block(self, metric: Histogram, attributes: dict[str, Any]) -> AbstractContextManager[None]:
         class _Timer:
-            def __enter__(self_inner):
-                self_inner.start = perf_counter()
-                return self_inner
+            def __enter__(self) -> None:
+                self.start = perf_counter()
 
-            def __exit__(self_inner, exc_type, exc, tb):
-                elapsed_ms = (perf_counter() - self_inner.start) * 1000
+            def __exit__(
+                self,
+                exc_type: type[BaseException] | None,
+                exc: BaseException | None,
+                tb: TracebackType | None,
+            ) -> None:
+                elapsed_ms = (perf_counter() - self.start) * 1000
                 metric.record(elapsed_ms, attributes=attributes)
 
         return _Timer()
@@ -111,11 +112,8 @@ def configure_telemetry(settings: RuntimeSettings | None = None) -> Telemetry:
 
     metric_readers: list[PeriodicExportingMetricReader] = []
 
-    if (
-        effective_settings.applicationinsights_connection_string
-        and AzureMonitorMetricExporter is not None
-    ):
-        metric_exporter = AzureMonitorMetricExporter(
+    if effective_settings.applicationinsights_connection_string and azure_monitor_exporter is not None:
+        metric_exporter = azure_monitor_exporter.AzureMonitorMetricExporter(
             connection_string=effective_settings.applicationinsights_connection_string.get_secret_value()
         )
         metric_readers.append(PeriodicExportingMetricReader(metric_exporter))
@@ -126,11 +124,8 @@ def configure_telemetry(settings: RuntimeSettings | None = None) -> Telemetry:
     metrics.set_meter_provider(meter_provider)
 
     tracer_provider = TracerProvider(resource=resource)
-    if (
-        effective_settings.applicationinsights_connection_string
-        and AzureMonitorTraceExporter is not None
-    ):
-        trace_exporter = AzureMonitorTraceExporter(
+    if effective_settings.applicationinsights_connection_string and azure_monitor_exporter is not None:
+        trace_exporter = azure_monitor_exporter.AzureMonitorTraceExporter(
             connection_string=effective_settings.applicationinsights_connection_string.get_secret_value()
         )
         tracer_provider.add_span_processor(BatchSpanProcessor(trace_exporter))
@@ -139,12 +134,9 @@ def configure_telemetry(settings: RuntimeSettings | None = None) -> Telemetry:
 
     trace.set_tracer_provider(tracer_provider)
 
-    if (
-        effective_settings.applicationinsights_connection_string
-        and AzureMonitorLogExporter is not None
-    ):
+    if effective_settings.applicationinsights_connection_string and azure_monitor_exporter is not None:
         # Reserved for future logging pipeline hookup.
-        _ = AzureMonitorLogExporter(
+        _ = azure_monitor_exporter.AzureMonitorLogExporter(
             connection_string=effective_settings.applicationinsights_connection_string.get_secret_value()
         )
 

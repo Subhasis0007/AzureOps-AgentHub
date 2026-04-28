@@ -4,7 +4,7 @@ from functools import lru_cache
 from typing import Literal
 
 from azure.identity import DefaultAzureCredential, ManagedIdentityCredential
-from pydantic import BaseModel, Field, SecretStr, computed_field, field_validator
+from pydantic import BaseModel, Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -131,7 +131,6 @@ class RuntimeSettings(BaseSettings):
             raise ValueError("Inbound topic must follow namespace.topic naming style.")
         return normalized
 
-    @computed_field
     @property
     def service_bus(self) -> ServiceBusSettings:
         return ServiceBusSettings(
@@ -140,7 +139,6 @@ class RuntimeSettings(BaseSettings):
             inbound_topic=self.acrge_inbound_topic,
         )
 
-    @computed_field
     @property
     def cosmos(self) -> CosmosSettings:
         return CosmosSettings(
@@ -150,7 +148,6 @@ class RuntimeSettings(BaseSettings):
             audit_container=self.cosmos_audit_container,
         )
 
-    @computed_field
     @property
     def redis(self) -> RedisSettings:
         return RedisSettings(
@@ -161,7 +158,6 @@ class RuntimeSettings(BaseSettings):
             ttl_seconds=self.redis_ttl_seconds,
         )
 
-    @computed_field
     @property
     def blob(self) -> BlobSettings:
         return BlobSettings(
@@ -170,7 +166,6 @@ class RuntimeSettings(BaseSettings):
             artifacts_container=self.blob_container_artifacts,
         )
 
-    @computed_field
     @property
     def search(self) -> SearchSettings:
         return SearchSettings(
@@ -179,7 +174,6 @@ class RuntimeSettings(BaseSettings):
             api_key=self.ai_search_api_key,
         )
 
-    @computed_field
     @property
     def foundry(self) -> FoundrySettings:
         return FoundrySettings(
@@ -189,7 +183,6 @@ class RuntimeSettings(BaseSettings):
             embedding_deployment=self.foundry_embedding_deployment_name,
         )
 
-    @computed_field
     @property
     def azure_devops(self) -> AzureDevOpsSettings:
         return AzureDevOpsSettings(
@@ -199,7 +192,6 @@ class RuntimeSettings(BaseSettings):
             pat=self.azdo_pat,
         )
 
-    @computed_field
     @property
     def telemetry(self) -> TelemetrySettings:
         return TelemetrySettings(

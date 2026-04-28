@@ -7,7 +7,6 @@ from typing import Any
 
 from pythonjsonlogger import jsonlogger
 
-
 _REQUEST_ID: ContextVar[str | None] = ContextVar("request_id", default=None)
 _INCIDENT_ID: ContextVar[str | None] = ContextVar("incident_id", default=None)
 
@@ -62,6 +61,7 @@ def configure_logging(log_level: str = "INFO", *, json_logs: bool = True) -> Non
     handler = logging.StreamHandler(sys.stdout)
     handler.addFilter(ContextFilter())
 
+    formatter: logging.Formatter
     if json_logs:
         formatter = ACRGEJsonFormatter("%(asctime)s %(levelname)s %(name)s %(message)s")
     else:

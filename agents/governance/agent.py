@@ -9,7 +9,13 @@ from pydantic import BaseModel, ConfigDict
 
 from agents.governance.tools.policy_rules import GovernanceRuleEngine
 from core.config.policy_loader import GovernancePolicy, load_governance_policy
-from core.state.schema import ACRGEState, AuditEntry, GovernanceDecision, GovernanceOutcome, MessageTrace
+from core.state.schema import (
+    ACRGEState,
+    AuditEntry,
+    GovernanceDecision,
+    GovernanceOutcome,
+    MessageTrace,
+)
 from core.utils.json_schemas import validate_payload
 
 

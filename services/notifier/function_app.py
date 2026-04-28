@@ -11,7 +11,6 @@ from core.config.settings import get_settings
 from core.utils.ids import generate_id
 from core.utils.logging import clear_log_context, configure_logging, get_logger, set_log_context
 
-
 settings = get_settings()
 configure_logging(settings.log_level)
 logger = get_logger("services.notifier")

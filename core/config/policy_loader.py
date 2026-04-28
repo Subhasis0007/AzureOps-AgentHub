@@ -8,10 +8,11 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_valida
 
 from core.config.settings import RuntimeSettings, get_settings
 
+azure_appconfiguration: Any | None
 try:
-    from azure.appconfiguration import AzureAppConfigurationClient
+    import azure.appconfiguration as azure_appconfiguration
 except Exception:  # pragma: no cover - optional import path for local testing
-    AzureAppConfigurationClient = None  # type: ignore[assignment]
+    azure_appconfiguration = None
 
 
 class GovernancePolicy(BaseModel):
@@ -67,17 +68,17 @@ def load_policy_from_file(path: str | Path) -> GovernancePolicy:
 
 
 def load_policy_from_app_config(settings: RuntimeSettings) -> GovernancePolicy:
-    if not settings.app_config_endpoint or AzureAppConfigurationClient is None:
+    if not settings.app_config_endpoint or azure_appconfiguration is None:
         return DEFAULT_POLICY
 
-    client = AzureAppConfigurationClient(
+    client = azure_appconfiguration.AzureAppConfigurationClient(
         base_url=settings.app_config_endpoint,
         credential=settings.build_credential(),
     )
 
     try:
         setting = client.get_configuration_setting(key=settings.app_config_policy_key)
-        if not setting.value:
+        if setting is None or not setting.value:
             return DEFAULT_POLICY
         return _parse_policy_blob(setting.value)
     except Exception:

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 from agents.code_generation.agent import CodeGenerationAgent
 from agents.diagnostic.agent import DiagnosticAgent
 from agents.governance.agent import GovernanceAgent
@@ -9,7 +11,7 @@ from core.config.policy_loader import GovernancePolicy
 from core.state.schema import ACRGEState
 
 
-def test_multi_agent_execution_pipeline(base_state: ACRGEState, tmp_path) -> None:
+def test_multi_agent_execution_pipeline(base_state: ACRGEState, tmp_path: Path) -> None:
     (tmp_path / "pipelines").mkdir(parents=True, exist_ok=True)
     (tmp_path / "pipelines" / "ci.yml").write_text("name: ci\n", encoding="utf-8")
 

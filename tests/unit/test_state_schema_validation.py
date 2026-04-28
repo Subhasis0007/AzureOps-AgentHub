@@ -5,7 +5,13 @@ from datetime import datetime
 import pytest
 from pydantic import ValidationError
 
-from core.state.schema import ACRGEState, DiagnosticReport, IncidentEvent, IncidentSource, PullRequestSpec
+from core.state.schema import (
+    ACRGEState,
+    DiagnosticReport,
+    IncidentEvent,
+    IncidentSource,
+    PullRequestSpec,
+)
 
 
 def test_incident_event_coerces_detected_at_to_utc() -> None:

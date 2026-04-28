@@ -4,7 +4,6 @@ from datetime import UTC, datetime
 from hashlib import blake2b
 from uuid import uuid4
 
-
 DEFAULT_INCIDENT_PREFIX = "inc"
 DEFAULT_AUDIT_PREFIX = "aud"
 DEFAULT_PR_PREFIX = "pr"

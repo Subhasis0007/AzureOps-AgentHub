@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 from agents.code_generation.agent import CodeGenerationAgent
 from agents.diagnostic.agent import DiagnosticAgent
 from agents.governance.agent import GovernanceAgent
@@ -10,7 +12,7 @@ from core.state.schema import ACRGEState
 from services.ingest.normalizers import normalize_event
 
 
-def test_e2e_devops_to_governance_flow(tmp_path) -> None:
+def test_e2e_devops_to_governance_flow(tmp_path: Path) -> None:
     payload = {
         "eventType": "ms.vss-pipelines.job-state-changed-event",
         "resource": {

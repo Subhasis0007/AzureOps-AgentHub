@@ -3,7 +3,7 @@ from __future__ import annotations
 from agents.governance.agent import GovernanceAgent
 from agents.governance.tools.policy_rules import GovernanceRuleEngine
 from core.config.policy_loader import GovernancePolicy
-from core.state.schema import ACRGEState, DiagnosticReport, PullRequestSpec
+from core.state.schema import ACRGEState, DiagnosticReport, LogTaxonomy, PullRequestSpec, RiskLevel
 
 
 def test_rule_engine_requires_human_for_prod_and_main() -> None:
@@ -28,7 +28,7 @@ def test_governance_agent_sets_decision_and_audit(base_state: ACRGEState) -> Non
                 incident_id=base_state.incident.incident_id,
                 summary="Config drift suspected",
                 confidence=0.9,
-                taxonomy="config",
+                taxonomy=LogTaxonomy.CONFIG,
                 root_cause_hypotheses=["Variable mismatch"],
             ),
             "pr_spec": PullRequestSpec(
@@ -38,7 +38,7 @@ def test_governance_agent_sets_decision_and_audit(base_state: ACRGEState) -> Non
                 target_branch="feature/ops-fix",
                 title="Fix config issue",
                 body="Valid remediation notes that satisfy minimum length.",
-                risk_level="low",
+                risk_level=RiskLevel.LOW,
             ),
         }
     )
