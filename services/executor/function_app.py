@@ -1,10 +1,16 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 from dataclasses import dataclass
 
 import azure.functions as func
 
+from agents.code_generation.agent import CodeGenerationAgent
+from agents.cost_optimization.agent import CostOptimizationAgent
+from agents.diagnostic.agent import DiagnosticAgent
+from agents.governance.agent import GovernanceAgent
+from agents.log_analysis.agent import LogAnalysisAgent
 from agents.supervisor.agent import SupervisorAgent
 from core.config.settings import get_settings
 from core.state.schema import ACRGEState, IncidentEvent, MessageTrace
@@ -40,6 +46,53 @@ class ServiceBusConsumer:
 
 consumer = ServiceBusConsumer()
 supervisor = SupervisorAgent()
+diagnostic_agent = DiagnosticAgent()
+log_analysis_agent = LogAnalysisAgent()
+code_generation_agent = CodeGenerationAgent()
+governance_agent = GovernanceAgent()
+cost_optimization_agent = CostOptimizationAgent()
+
+
+def _extract_supervisor_route(state: ACRGEState) -> str:
+    for step in reversed(state.reasoning_trace):
+        if step.startswith("supervisor.route="):
+            route_segment = step.split("=", 1)[1]
+            return route_segment.split(" ", 1)[0]
+    return "governance_agent"
+
+
+def execute_route_pipeline(state: ACRGEState, route_to: str) -> ACRGEState:
+    node_map: dict[str, tuple[Callable[[ACRGEState], ACRGEState], ...]] = {
+        "diagnostic_agent": (
+            diagnostic_agent.run,
+            log_analysis_agent.run,
+            code_generation_agent.run,
+            governance_agent.run,
+        ),
+        "log_analysis_agent": (
+            log_analysis_agent.run,
+            code_generation_agent.run,
+            governance_agent.run,
+        ),
+        "code_generation_agent": (
+            code_generation_agent.run,
+            governance_agent.run,
+        ),
+        "governance_agent": (governance_agent.run,),
+        "cost_optimization_agent": (cost_optimization_agent.run, governance_agent.run),
+        "human_escalation": (governance_agent.run,),
+    }
+
+    current = state
+    for run_node in node_map.get(route_to, (governance_agent.run,)):
+        current = run_node(current)
+    return current
+
+
+def run_incident_pipeline(state: ACRGEState) -> ACRGEState:
+    routed = supervisor.run(state)
+    route_to = _extract_supervisor_route(routed)
+    return execute_route_pipeline(routed, route_to)
 
 
 @app.service_bus_topic_trigger(
@@ -76,12 +129,14 @@ def execute_incident(message: func.ServiceBusMessage) -> None:
             ],
         )
 
-        routed = supervisor.run(state)
+        final_state = run_incident_pipeline(state)
         logger.info(
-            "supervisor completed routing",
+            "executor completed routed incident pipeline",
             extra={
-                "reasoning_steps": len(routed.reasoning_trace),
-                "has_governance_decision": routed.governance_decision is not None,
+                "reasoning_steps": len(final_state.reasoning_trace),
+                "has_diagnostic_report": final_state.diagnostic_report is not None,
+                "has_pr_spec": final_state.pr_spec is not None,
+                "has_governance_decision": final_state.governance_decision is not None,
             },
         )
     except Exception:
